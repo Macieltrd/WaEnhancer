@@ -46,6 +46,15 @@ class GeneralFragment : BaseFragment() {
             setPreferencesFromResource(R.xml.fragment_general, rootKey)
         }
 
+        override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+            super.onViewCreated(view, savedInstanceState)
+            // Espaço entre a barra do topo e o primeiro cartão (igual às outras abas)
+            listView?.let {
+                it.clipToPadding = false
+                it.setPadding(it.paddingLeft, (8 * resources.displayMetrics.density).toInt(), it.paddingRight, it.paddingBottom)
+            }
+        }
+
         override fun onResume() {
             super.onResume()
             setDisplayHomeAsUpEnabled(false)
