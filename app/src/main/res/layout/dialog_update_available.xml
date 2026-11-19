@@ -31,7 +31,7 @@
                 android:id="@+id/tv_update_title"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="New Update Available!"
+                android:text="Nova atualização disponível!"
                 android:textSize="20sp"
                 android:textStyle="bold"
                 android:textColor="?android:textColorPrimary" />
@@ -40,7 +40,7 @@
                 android:id="@+id/tv_update_subtitle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="A newer version is ready to install"
+                android:text="Uma versão mais nova está pronta para instalar"
                 android:textSize="14sp"
                 android:textColor="?android:textColorSecondary"
                 android:layout_marginTop="4dp" />
@@ -65,7 +65,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Version"
+                android:text="Versão"
                 android:textSize="12sp"
                 android:textColor="?android:textColorSecondary"
                 android:textAllCaps="true"
@@ -100,7 +100,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Released"
+                android:text="Lançada em"
                 android:textSize="12sp"
                 android:textColor="?android:textColorSecondary"
                 android:textAllCaps="true"
@@ -124,7 +124,7 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="What's New"
+        android:text="Novidades"
         android:textSize="16sp"
         android:textStyle="bold"
         android:textColor="?android:textColorPrimary"
@@ -141,7 +141,7 @@
             android:id="@+id/tv_changelog"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Loading changelog..."
+            android:text="Carregando novidades..."
             android:textSize="14sp"
             android:textColor="?android:textColorSecondary"
             android:lineSpacingExtra="4dp"

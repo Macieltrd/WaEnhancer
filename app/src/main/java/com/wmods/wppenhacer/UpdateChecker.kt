@@ -87,10 +87,10 @@ class UpdateChecker(private val mActivity: Activity) : Runnable {
                 if (formattedDate.isNotEmpty()) {
                     append("📅 **Released:** ").append(formattedDate).append("\n")
                 }
-                append("\n### What's New\n\n").append(changelog)
+                append("\n### Novidades\n\n").append(changelog)
             }
 
-            dialog.setTitle("🎉 New Update Available!")
+            dialog.setTitle("🎉 Nova atualização disponível!")
             dialog.setMessage(markwon.toMarkdown(message))
             dialog.setNegativeButton("Ignore") { dialog, _ ->
                 WppCore.setPrivString("ignored_version", hash)

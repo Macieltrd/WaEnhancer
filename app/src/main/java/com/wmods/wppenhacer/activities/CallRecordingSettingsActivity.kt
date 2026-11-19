@@ -45,7 +45,7 @@ class CallRecordingSettingsActivity : AppCompatActivity() {
             Log.d(TAG, "Root mode clicked")
             radioRoot.isChecked = true
             radioNonRoot.isChecked = false
-            Toast.makeText(this, "Checking root access...", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "Verificando acesso root...", Toast.LENGTH_SHORT).show()
             checkRootAccess()
         }
 

@@ -50,23 +50,9 @@ class GeneralFragment : BaseFragment() {
             super.onViewCreated(view, savedInstanceState)
             val d = resources.displayMetrics.density
             listView?.let { list ->
-                // Desce o primeiro bloco: mesmo espaço do topo das outras abas (12dp)
+                // Mesmo espaço do topo das outras abas (12dp); o resto segue as mesmas medidas das demais abas
                 list.clipToPadding = false
                 list.setPadding(list.paddingLeft, (12 * d).toInt(), list.paddingRight, list.paddingBottom)
-
-                // Sobe o resto: aproxima o título "STATUS" do bloco de cima (8dp a menos)
-                list.addItemDecoration(object : androidx.recyclerview.widget.RecyclerView.ItemDecoration() {
-                    override fun getItemOffsets(
-                        outRect: android.graphics.Rect,
-                        child: View,
-                        parent: androidx.recyclerview.widget.RecyclerView,
-                        state: androidx.recyclerview.widget.RecyclerView.State
-                    ) {
-                        if (parent.getChildAdapterPosition(child) == 3) {
-                            outRect.top = -(8 * d).toInt()
-                        }
-                    }
-                })
             }
         }
 
