@@ -55,6 +55,8 @@ abstract class BasePreferenceFragment : PreferenceFragmentCompat(),
                 override fun handleOnBackPressed() {
                     if (parentFragmentManager.backStackEntryCount > 0) {
                         parentFragmentManager.popBackStack()
+                    } else if (requireActivity().supportFragmentManager.backStackEntryCount > 0) {
+                        requireActivity().supportFragmentManager.popBackStack()
                     } else {
                         requireActivity().finish()
                     }

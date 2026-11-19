@@ -85,6 +85,21 @@ class MainActivity : BaseActivity() {
             }
         })
 
+        // Tocar de novo na aba em que você já está volta para a tela principal dela
+        // (por exemplo: de dentro de "Geral > Tela inicial" volta para a lista de menus da aba Geral)
+        binding.navView.setOnItemReselectedListener {
+            val fm = supportFragmentManager
+            if (fm.backStackEntryCount > 0) {
+                fm.popBackStack(null, androidx.fragment.app.FragmentManager.POP_BACK_STACK_INCLUSIVE)
+            } else {
+                val current = fm.findFragmentByTag("f${binding.viewPager.currentItem}")
+                val child = current?.childFragmentManager
+                if (child != null && child.backStackEntryCount > 0) {
+                    child.popBackStack(null, androidx.fragment.app.FragmentManager.POP_BACK_STACK_INCLUSIVE)
+                }
+            }
+        }
+
         binding.viewPager.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
             override fun onPageSelected(position: Int) {
                 super.onPageSelected(position)
