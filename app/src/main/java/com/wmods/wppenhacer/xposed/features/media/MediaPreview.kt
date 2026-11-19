@@ -8,6 +8,8 @@ import android.graphics.BitmapFactory
 import android.graphics.Color
 import android.graphics.Matrix
 import android.graphics.PointF
+import android.media.AudioAttributes
+import android.media.AudioManager
 import android.media.MediaPlayer
 import android.net.Uri
 import android.webkit.MimeTypeMap
@@ -706,6 +708,14 @@ class MediaPreview(
             videoContainer.addView(controls)
             container.addView(videoContainer)
 
+            // Fix: força saída de áudio de mídia e pede foco de áudio, para o vídeo tocar com som
+            videoView.setAudioAttributes(
+                AudioAttributes.Builder()
+                    .setUsage(AudioAttributes.USAGE_MEDIA)
+                    .setContentType(AudioAttributes.CONTENT_TYPE_MOVIE)
+                    .build()
+            )
+            videoView.setAudioFocusRequest(AudioManager.AUDIOFOCUS_GAIN)
             videoView.setVideoURI(Uri.fromFile(filePath))
             videoView.setOnPreparedListener { mp ->
                 currentMediaPlayer = mp
