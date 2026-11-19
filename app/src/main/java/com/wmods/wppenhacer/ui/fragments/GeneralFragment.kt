@@ -48,10 +48,25 @@ class GeneralFragment : BaseFragment() {
 
         override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
             super.onViewCreated(view, savedInstanceState)
-            // Espaço entre a barra do topo e o primeiro cartão (igual às outras abas)
-            listView?.let {
-                it.clipToPadding = false
-                it.setPadding(it.paddingLeft, (8 * resources.displayMetrics.density).toInt(), it.paddingRight, it.paddingBottom)
+            val d = resources.displayMetrics.density
+            listView?.let { list ->
+                // Desce o primeiro bloco: mesmo espaço do topo das outras abas (12dp)
+                list.clipToPadding = false
+                list.setPadding(list.paddingLeft, (12 * d).toInt(), list.paddingRight, list.paddingBottom)
+
+                // Sobe o resto: aproxima o título "STATUS" do bloco de cima (8dp a menos)
+                list.addItemDecoration(object : androidx.recyclerview.widget.RecyclerView.ItemDecoration() {
+                    override fun getItemOffsets(
+                        outRect: android.graphics.Rect,
+                        child: View,
+                        parent: androidx.recyclerview.widget.RecyclerView,
+                        state: androidx.recyclerview.widget.RecyclerView.State
+                    ) {
+                        if (parent.getChildAdapterPosition(child) == 3) {
+                            outRect.top = -(8 * d).toInt()
+                        }
+                    }
+                })
             }
         }
 
