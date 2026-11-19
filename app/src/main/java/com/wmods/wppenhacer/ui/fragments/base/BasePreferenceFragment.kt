@@ -2,6 +2,7 @@ package com.wmods.wppenhacer.ui.fragments.base
 
 import android.Manifest
 import android.annotation.SuppressLint
+import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
 import android.content.pm.PackageManager
@@ -19,6 +20,9 @@ import androidx.preference.Preference
 import androidx.preference.PreferenceCategory
 import androidx.preference.PreferenceFragmentCompat
 import androidx.preference.PreferenceGroup
+import androidx.preference.PreferenceGroupAdapter
+import androidx.preference.PreferenceScreen
+import androidx.preference.PreferenceViewHolder
 import androidx.preference.PreferenceManager
 import androidx.preference.SeekBarPreference
 import androidx.recyclerview.widget.RecyclerView
@@ -64,6 +68,7 @@ abstract class BasePreferenceFragment : PreferenceFragmentCompat(),
         savedInstanceState: Bundle?
     ): View {
         applyReferencePreferenceStyle(preferenceScreen, R.drawable.ic_general)
+        setupCollapsibleSections()
         updatePreferenceStates(null)
         monitorPreference()
         return super.onCreateView(inflater, container, savedInstanceState)!!
@@ -317,8 +322,74 @@ abstract class BasePreferenceFragment : PreferenceFragmentCompat(),
         }
     }
 
+
+    // ---------- Seções que recolhem/expandem ao tocar no título ----------
+
+    private val sectionPrefs by lazy {
+        requireContext().getSharedPreferences("ui_sections", Context.MODE_PRIVATE)
+    }
+
+    private fun sectionKey(category: PreferenceCategory) =
+        "${javaClass.simpleName}:${category.title}"
+
+    private fun isSectionCollapsed(category: PreferenceCategory): Boolean =
+        sectionPrefs.getBoolean(sectionKey(category), false)
+
+    private fun setSectionCollapsed(category: PreferenceCategory, collapsed: Boolean) {
+        sectionPrefs.edit().putBoolean(sectionKey(category), collapsed).apply()
+        for (i in 0 until category.preferenceCount) {
+            category.getPreference(i).isVisible = !collapsed
+        }
+    }
+
+    private fun setupCollapsibleSections() {
+        val screen = preferenceScreen ?: return
+        var first = true
+        for (index in 0 until screen.preferenceCount) {
+            val category = screen.getPreference(index) as? PreferenceCategory ?: continue
+            // Primeira seção da tela começa aberta; as outras começam recolhidas
+            // (depois disso, o app lembra o que você deixou aberto ou fechado)
+            val collapsed = if (sectionPrefs.contains(sectionKey(category)))
+                isSectionCollapsed(category) else !first
+            first = false
+            for (i in 0 until category.preferenceCount) {
+                category.getPreference(i).isVisible = !collapsed
+            }
+            sectionPrefs.edit().putBoolean(sectionKey(category), collapsed).apply()
+        }
+    }
+
+    private fun expandAllSections() {
+        val screen = preferenceScreen ?: return
+        for (index in 0 until screen.preferenceCount) {
+            val category = screen.getPreference(index) as? PreferenceCategory ?: continue
+            if (isSectionCollapsed(category)) setSectionCollapsed(category, false)
+        }
+    }
+
+    override fun onCreateAdapter(preferenceScreen: PreferenceScreen): RecyclerView.Adapter<*> {
+        return object : PreferenceGroupAdapter(preferenceScreen) {
+            override fun onBindViewHolder(holder: PreferenceViewHolder, position: Int) {
+                super.onBindViewHolder(holder, position)
+                val item = getItem(position)
+                if (item is PreferenceCategory && item.parent === preferenceScreen) {
+                    val chevron = holder.itemView.findViewById<android.widget.ImageView>(R.id.section_chevron)
+                    chevron?.visibility = View.VISIBLE
+                    chevron?.rotation = if (isSectionCollapsed(item)) 0f else 180f
+                    holder.itemView.isClickable = true
+                    holder.itemView.setOnClickListener {
+                        val collapsed = !isSectionCollapsed(item)
+                        chevron?.animate()?.rotation(if (collapsed) 0f else 180f)?.setDuration(150)?.start()
+                        setSectionCollapsed(item, collapsed)
+                    }
+                }
+            }
+        }
+    }
+
     /** Scroll to a preference by its key and briefly highlight it. */
     override fun scrollToPreference(preferenceKey: String) {
+        expandAllSections()
         view?.postDelayed({
             val preference = findPreference<Preference>(preferenceKey) ?: return@postDelayed
             super.scrollToPreference(preference)

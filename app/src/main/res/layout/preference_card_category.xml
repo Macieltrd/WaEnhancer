@@ -35,4 +35,14 @@
         android:textAppearance="?attr/textAppearanceLabelLarge"
         android:textColor="?attr/colorPrimary" />
 
+    <ImageView
+        android:id="@+id/section_chevron"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:layout_marginStart="8dp"
+        android:contentDescription="@null"
+        android:src="@drawable/ic_section_chevron"
+        android:tint="?attr/colorPrimary"
+        android:visibility="gone" />
+
 </LinearLayout>
