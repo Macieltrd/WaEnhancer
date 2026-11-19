@@ -41,6 +41,9 @@ class GeneralFragment : BaseFragment() {
     }
 
     class GeneralPreferenceFragment : BasePreferenceFragment() {
+        // Aba Geral tem pouca coisa: seção "STATUS" fica sempre aberta, sem setinha
+        override fun hasCollapsibleSections(): Boolean = false
+
         override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
             super.onCreatePreferences(savedInstanceState, rootKey)
             setPreferencesFromResource(R.xml.fragment_general, rootKey)

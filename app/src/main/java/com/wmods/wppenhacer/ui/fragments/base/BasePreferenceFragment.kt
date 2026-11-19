@@ -25,6 +25,7 @@ import androidx.preference.PreferenceScreen
 import androidx.preference.PreferenceViewHolder
 import androidx.preference.PreferenceManager
 import androidx.preference.SeekBarPreference
+import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.jaredrummler.android.colorpicker.ColorPreferenceCompat
@@ -325,6 +326,18 @@ abstract class BasePreferenceFragment : PreferenceFragmentCompat(),
 
     // ---------- Seções que recolhem/expandem ao tocar no título ----------
 
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        // Recolher/expandir mais suave (parecido com o outro app): some com fade,
+        // o que está embaixo desliza, e ao abrir os itens surgem com fade
+        listView?.itemAnimator = DefaultItemAnimator().apply {
+            supportsChangeAnimations = false
+            removeDuration = 150
+            moveDuration = 220
+            addDuration = 220
+        }
+    }
+
     private val sectionPrefs by lazy {
         requireContext().getSharedPreferences("ui_sections", Context.MODE_PRIVATE)
     }
@@ -342,8 +355,12 @@ abstract class BasePreferenceFragment : PreferenceFragmentCompat(),
         }
     }
 
+    /** Telas com poucas opções podem desligar o recolhimento das seções. */
+    protected open fun hasCollapsibleSections(): Boolean = true
+
     private fun setupCollapsibleSections() {
         val screen = preferenceScreen ?: return
+        if (!hasCollapsibleSections()) return
         var first = true
         for (index in 0 until screen.preferenceCount) {
             val category = screen.getPreference(index) as? PreferenceCategory ?: continue
@@ -372,14 +389,14 @@ abstract class BasePreferenceFragment : PreferenceFragmentCompat(),
             override fun onBindViewHolder(holder: PreferenceViewHolder, position: Int) {
                 super.onBindViewHolder(holder, position)
                 val item = getItem(position)
-                if (item is PreferenceCategory && item.parent === preferenceScreen) {
+                if (hasCollapsibleSections() && item is PreferenceCategory && item.parent === preferenceScreen) {
                     val chevron = holder.itemView.findViewById<android.widget.ImageView>(R.id.section_chevron)
                     chevron?.visibility = View.VISIBLE
                     chevron?.rotation = if (isSectionCollapsed(item)) 0f else 180f
                     holder.itemView.isClickable = true
                     holder.itemView.setOnClickListener {
                         val collapsed = !isSectionCollapsed(item)
-                        chevron?.animate()?.rotation(if (collapsed) 0f else 180f)?.setDuration(150)?.start()
+                        chevron?.animate()?.rotation(if (collapsed) 0f else 180f)?.setDuration(250)?.start()
                         setSectionCollapsed(item, collapsed)
                     }
                 }

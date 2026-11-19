@@ -37,12 +37,14 @@
 
     <ImageView
         android:id="@+id/section_chevron"
-        android:layout_width="24dp"
-        android:layout_height="24dp"
+        android:layout_width="30dp"
+        android:layout_height="30dp"
         android:layout_marginStart="8dp"
+        android:background="@drawable/bg_section_chevron"
         android:contentDescription="@null"
+        android:padding="6dp"
         android:src="@drawable/ic_section_chevron"
-        android:tint="?attr/colorPrimary"
+        android:tint="?attr/colorOnSurfaceVariant"
         android:visibility="gone" />
 
 </LinearLayout>
