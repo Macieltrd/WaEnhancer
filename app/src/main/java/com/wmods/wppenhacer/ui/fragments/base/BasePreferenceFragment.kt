@@ -305,12 +305,15 @@ abstract class BasePreferenceFragment : PreferenceFragmentCompat(),
     fun setDisplayHomeAsUpEnabled(enabled: Boolean) {
         val act = activity as? AppCompatActivity ?: return
         val actionBar = act.supportActionBar ?: return
-        actionBar.setDisplayHomeAsUpEnabled(enabled)
+        // Sem seta de voltar em nenhuma tela: o logo fica sempre no mesmo lugar,
+        // alinhado com a borda esquerda dos cartões (16dp). Voltar = botão/gesto do Android.
+        actionBar.setDisplayHomeAsUpEnabled(false)
 
-        // Mantém o logo sempre no mesmo lugar: sem a seta de voltar, reserva o espaço dela (56dp)
         act.findViewById<android.view.View>(com.wmods.wppenhacer.R.id.toolbar)?.let { tb ->
-            val arrowSpace = if (enabled) 0 else (56 * tb.resources.displayMetrics.density).toInt()
-            tb.setPaddingRelative(arrowSpace, tb.paddingTop, tb.paddingEnd, tb.paddingBottom)
+            val d = tb.resources.displayMetrics.density
+            val margin = (16 * d).toInt()   // logo alinhado com a borda esquerda dos cartões
+            val endFix = (2 * d).toInt()    // ícones da direita alinhados com a borda direita dos cartões
+            tb.setPaddingRelative(margin, tb.paddingTop, endFix, tb.paddingBottom)
         }
     }
 
