@@ -312,7 +312,7 @@ abstract class BasePreferenceFragment : PreferenceFragmentCompat(),
         act.findViewById<android.view.View>(com.wmods.wppenhacer.R.id.toolbar)?.let { tb ->
             val d = tb.resources.displayMetrics.density
             val margin = (16 * d).toInt()   // logo alinhado com a borda esquerda dos cartões
-            val endFix = (2 * d).toInt()    // ícones da direita alinhados com a borda direita dos cartões
+            val endFix = (4.5f * d).toInt()    // ícones da direita alinhados com a borda direita dos cartões
             tb.setPaddingRelative(margin, tb.paddingTop, endFix, tb.paddingBottom)
         }
     }
