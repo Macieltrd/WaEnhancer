@@ -22,7 +22,14 @@ open class BaseFragment : Fragment() {
     }
 
     fun setDisplayHomeAsUpEnabled(enabled: Boolean) {
-        val actionBar = (activity as? AppCompatActivity)?.supportActionBar ?: return
+        val act = activity as? AppCompatActivity ?: return
+        val actionBar = act.supportActionBar ?: return
         actionBar.setDisplayHomeAsUpEnabled(enabled)
+
+        // Mantém o logo sempre no mesmo lugar: sem a seta de voltar, reserva o espaço dela (56dp)
+        act.findViewById<android.view.View>(com.wmods.wppenhacer.R.id.toolbar)?.let { tb ->
+            val arrowSpace = if (enabled) 0 else (56 * tb.resources.displayMetrics.density).toInt()
+            tb.setPaddingRelative(arrowSpace, tb.paddingTop, tb.paddingEnd, tb.paddingBottom)
+        }
     }
 }
