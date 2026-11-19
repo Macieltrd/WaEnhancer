@@ -25,7 +25,6 @@ import androidx.preference.PreferenceScreen
 import androidx.preference.PreferenceViewHolder
 import androidx.preference.PreferenceManager
 import androidx.preference.SeekBarPreference
-import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.jaredrummler.android.colorpicker.ColorPreferenceCompat
@@ -69,7 +68,6 @@ abstract class BasePreferenceFragment : PreferenceFragmentCompat(),
         savedInstanceState: Bundle?
     ): View {
         applyReferencePreferenceStyle(preferenceScreen, R.drawable.ic_general)
-        setupCollapsibleSections()
         updatePreferenceStates(null)
         monitorPreference()
         return super.onCreateView(inflater, container, savedInstanceState)!!
@@ -325,71 +323,149 @@ abstract class BasePreferenceFragment : PreferenceFragmentCompat(),
 
 
     // ---------- Seções que recolhem/expandem ao tocar no título ----------
+    // Movimento igual ao do outro app: as linhas encolhem e somem (fade) ao mesmo tempo,
+    // e o que está embaixo sobe junto. Ao abrir, crescem e surgem ao mesmo tempo.
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        // Recolher/expandir mais suave (parecido com o outro app): some com fade,
-        // o que está embaixo desliza, e ao abrir os itens surgem com fade
-        listView?.itemAnimator = DefaultItemAnimator().apply {
-            supportsChangeAnimations = false
-            removeDuration = 150
-            moveDuration = 220
-            addDuration = 220
-        }
+        // Quem anima é o código abaixo; o animador padrão da lista atrapalharia
+        listView?.itemAnimator = null
     }
 
+    // v2: todas as seções começam fechadas (e o app lembra o que você abrir depois)
     private val sectionPrefs by lazy {
-        requireContext().getSharedPreferences("ui_sections", Context.MODE_PRIVATE)
+        requireContext().getSharedPreferences("ui_sections_v2", Context.MODE_PRIVATE)
     }
+
+    private val rowMargins = java.util.WeakHashMap<View, Int>()
+    private val sectionAnimators = HashMap<PreferenceCategory, android.animation.ValueAnimator>()
+    private var sectionAdapter: PreferenceGroupAdapter? = null
 
     private fun sectionKey(category: PreferenceCategory) =
         "${javaClass.simpleName}:${category.title}"
 
     private fun isSectionCollapsed(category: PreferenceCategory): Boolean =
-        sectionPrefs.getBoolean(sectionKey(category), false)
-
-    private fun setSectionCollapsed(category: PreferenceCategory, collapsed: Boolean) {
-        sectionPrefs.edit().putBoolean(sectionKey(category), collapsed).apply()
-        for (i in 0 until category.preferenceCount) {
-            category.getPreference(i).isVisible = !collapsed
-        }
-    }
+        sectionPrefs.getBoolean(sectionKey(category), true)
 
     /** Telas com poucas opções podem desligar o recolhimento das seções. */
     protected open fun hasCollapsibleSections(): Boolean = true
 
-    private fun setupCollapsibleSections() {
-        val screen = preferenceScreen ?: return
-        if (!hasCollapsibleSections()) return
-        var first = true
-        for (index in 0 until screen.preferenceCount) {
-            val category = screen.getPreference(index) as? PreferenceCategory ?: continue
-            // Primeira seção da tela começa aberta; as outras começam recolhidas
-            // (depois disso, o app lembra o que você deixou aberto ou fechado)
-            val collapsed = if (sectionPrefs.contains(sectionKey(category)))
-                isSectionCollapsed(category) else !first
-            first = false
-            for (i in 0 until category.preferenceCount) {
-                category.getPreference(i).isVisible = !collapsed
-            }
-            sectionPrefs.edit().putBoolean(sectionKey(category), collapsed).apply()
+    private fun sectionOf(preference: Preference?): PreferenceCategory? {
+        val parent = preference?.parent
+        return if (parent is PreferenceCategory && parent.parent === preferenceScreen) parent else null
+    }
+
+    /** Aplica, sem animação, o estado "fechado" ou "aberto" a uma linha. */
+    private fun applyRowState(view: View, collapsed: Boolean) {
+        val lp = view.layoutParams as? ViewGroup.MarginLayoutParams ?: return
+        val margin = rowMargins.getOrPut(view) { lp.bottomMargin }
+        if (collapsed) {
+            lp.height = 0
+            lp.bottomMargin = 0
+            view.alpha = 0f
+        } else {
+            lp.height = ViewGroup.LayoutParams.WRAP_CONTENT
+            lp.bottomMargin = margin
+            view.alpha = 1f
         }
+    }
+
+    private fun toggleSection(category: PreferenceCategory, collapsed: Boolean) {
+        sectionPrefs.edit().putBoolean(sectionKey(category), collapsed).apply()
+        sectionAnimators.remove(category)?.cancel()
+        val list = listView ?: return
+        val adapter = sectionAdapter ?: return
+
+        val rows = ArrayList<View>()
+        for (i in 0 until list.childCount) {
+            val child = list.getChildAt(i)
+            val pos = list.getChildAdapterPosition(child)
+            if (pos == RecyclerView.NO_POSITION) continue
+            if (adapter.getItem(pos)?.parent === category) rows.add(child)
+        }
+        if (rows.isEmpty()) return
+
+        val widthAvail = list.width - list.paddingLeft - list.paddingRight
+        val n = rows.size
+        val startH = IntArray(n)
+        val endH = IntArray(n)
+        val startM = IntArray(n)
+        val endM = IntArray(n)
+        val startA = FloatArray(n)
+        val endA = if (collapsed) 0f else 1f
+        for (i in 0 until n) {
+            val r = rows[i]
+            val lp = r.layoutParams as ViewGroup.MarginLayoutParams
+            val margin = rowMargins.getOrPut(r) { lp.bottomMargin }
+            r.measure(
+                View.MeasureSpec.makeMeasureSpec(widthAvail - lp.marginStart - lp.marginEnd, View.MeasureSpec.EXACTLY),
+                View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED)
+            )
+            startH[i] = r.height
+            startM[i] = lp.bottomMargin
+            startA[i] = r.alpha
+            endH[i] = if (collapsed) 0 else r.measuredHeight
+            endM[i] = if (collapsed) 0 else margin
+        }
+
+        val anim = android.animation.ValueAnimator.ofFloat(0f, 1f)
+        anim.duration = 250
+        anim.interpolator = android.view.animation.PathInterpolator(0.4f, 0f, 0.2f, 1f)
+        var cancelled = false
+        anim.addUpdateListener { a ->
+            val p = a.animatedValue as Float
+            // ao fechar, o fade termina um pouco antes (como no outro app)
+            val pa = if (collapsed) minOf(1f, p * 1.25f) else p
+            for (i in 0 until n) {
+                val r = rows[i]
+                if (!r.isAttachedToWindow) continue
+                val lp = r.layoutParams as ViewGroup.MarginLayoutParams
+                lp.height = (startH[i] + (endH[i] - startH[i]) * p).toInt()
+                lp.bottomMargin = (startM[i] + (endM[i] - startM[i]) * p).toInt()
+                r.alpha = startA[i] + (endA - startA[i]) * pa
+                r.layoutParams = lp
+            }
+        }
+        anim.addListener(object : android.animation.AnimatorListenerAdapter() {
+            override fun onAnimationCancel(animation: android.animation.Animator) {
+                cancelled = true
+            }
+
+            override fun onAnimationEnd(animation: android.animation.Animator) {
+                sectionAnimators.remove(category)
+                if (cancelled) return
+                for (r in rows) {
+                    applyRowState(r, collapsed)
+                    r.requestLayout()
+                }
+            }
+        })
+        sectionAnimators[category] = anim
+        anim.start()
     }
 
     private fun expandAllSections() {
         val screen = preferenceScreen ?: return
+        var changed = false
         for (index in 0 until screen.preferenceCount) {
             val category = screen.getPreference(index) as? PreferenceCategory ?: continue
-            if (isSectionCollapsed(category)) setSectionCollapsed(category, false)
+            if (isSectionCollapsed(category)) {
+                sectionAnimators.remove(category)?.cancel()
+                sectionPrefs.edit().putBoolean(sectionKey(category), false).apply()
+                changed = true
+            }
         }
+        if (changed) sectionAdapter?.notifyDataSetChanged()
     }
 
     override fun onCreateAdapter(preferenceScreen: PreferenceScreen): RecyclerView.Adapter<*> {
-        return object : PreferenceGroupAdapter(preferenceScreen) {
+        val adapter = object : PreferenceGroupAdapter(preferenceScreen) {
             override fun onBindViewHolder(holder: PreferenceViewHolder, position: Int) {
                 super.onBindViewHolder(holder, position)
+                if (!hasCollapsibleSections()) return
                 val item = getItem(position)
-                if (hasCollapsibleSections() && item is PreferenceCategory && item.parent === preferenceScreen) {
+
+                if (item is PreferenceCategory && item.parent === preferenceScreen) {
                     val chevron = holder.itemView.findViewById<android.widget.ImageView>(R.id.section_chevron)
                     chevron?.visibility = View.VISIBLE
                     chevron?.rotation = if (isSectionCollapsed(item)) 0f else 180f
@@ -397,11 +473,19 @@ abstract class BasePreferenceFragment : PreferenceFragmentCompat(),
                     holder.itemView.setOnClickListener {
                         val collapsed = !isSectionCollapsed(item)
                         chevron?.animate()?.rotation(if (collapsed) 0f else 180f)?.setDuration(250)?.start()
-                        setSectionCollapsed(item, collapsed)
+                        toggleSection(item, collapsed)
                     }
+                    return
+                }
+
+                val section = sectionOf(item)
+                if (section != null && !sectionAnimators.containsKey(section)) {
+                    applyRowState(holder.itemView, isSectionCollapsed(section))
                 }
             }
         }
+        sectionAdapter = adapter
+        return adapter
     }
 
     /** Scroll to a preference by its key and briefly highlight it. */
