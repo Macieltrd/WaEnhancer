@@ -684,6 +684,10 @@ class MediaPreview(
                 return
             }
 
+            // Fix: o estado "mudo" fica salvo dentro do WhatsApp e persistia entre versões do módulo;
+            // sempre começa com som ligado (o botão de alto-falante ainda silencia durante a prévia)
+            WppCore.setPrivBoolean("video_preview_muted", false)
+
             val videoContainer = RelativeLayout(context).apply {
                 layoutParams = FrameLayout.LayoutParams(
                     FrameLayout.LayoutParams.MATCH_PARENT,
@@ -762,7 +766,7 @@ class MediaPreview(
                 dpToPx(context, 16),
                 dpToPx(context, 8),
                 dpToPx(context, 16),
-                dpToPx(context, 16)
+                dpToPx(context, 72) // sobe os botões para não ficarem atrás da barra do Android
             )
         }
 
