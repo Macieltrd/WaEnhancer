@@ -4,14 +4,14 @@
     <string name="floating_bottom_bar_sum">Ativa a barra de navegação inferior flutuante, estilo iOS</string>
     <string name="floating_bottom_bar_radius">Arredondamento da barra inferior</string>
     <string name="floating_bottom_bar_radius_sum">Ajusta o arredondamento das bordas da barra inferior flutuante</string>
-    <string name="disable_swipe_up_in_group">Desativar deslizar para cima nos grupos</string>
+    <string name="disable_swipe_up_in_group">Desativar deslize para cima</string>
     <string name="disable_swipe_up_in_group_sum">Desativa o gesto de deslizar para cima nas conversas de grupo</string>
     <string name="force_disable_emojis">Forçar desativação de emojis</string>
     <string name="force_disable_emojis_sum">Bloqueia os emojis do WhatsApp, deixando-os invisíveis (use o emoji do teclado).</string>
     <string name="force_disable_emojis_alert_title">Forçar desativação de emojis</string>
     <string name="force_disable_emojis_alert_msg">Este recurso deixa os emojis invisíveis no seletor de emojis. Para enviar emojis, use o emoji do teclado do seu aparelho.</string>
     <string name="checking_if_contact_added">Verificando se o contato adicionou você...</string>
-    <string name="show_contact_added_status">Mostrar se o contato te adicionou</string>
+    <string name="show_contact_added_status">Ver se o contato te adicionou</string>
     <string name="show_contact_added_status_sum">Esta opção verifica se o contato adicionou você ou tem foto de perfil pública.</string>
     <string name="contact_added">O contato adicionou você ou tem foto de perfil pública.</string>
     <string name="alert_module_notfound">Módulo Wa Enhancer não encontrado. Provavelmente o HMA está escondendo o módulo; remova o WhatsApp da lista do HMA e tente novamente.</string>
