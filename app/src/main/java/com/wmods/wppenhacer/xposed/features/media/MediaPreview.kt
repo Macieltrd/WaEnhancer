@@ -395,7 +395,7 @@ class MediaPreview(
             id = View.generateViewId()
             val headerParams = RelativeLayout.LayoutParams(
                 RelativeLayout.LayoutParams.MATCH_PARENT,
-                dpToPx(context, 28) // metade da altura original (56dp)
+                dpToPx(context, 40) // original era 56dp
             )
             headerParams.addRule(RelativeLayout.ALIGN_PARENT_TOP)
             layoutParams = headerParams
@@ -406,8 +406,8 @@ class MediaPreview(
         val closeBtn = ImageButton(context).apply {
             id = View.generateViewId()
             val closeBtnParams = RelativeLayout.LayoutParams(
-                dpToPx(context, 28),
-                dpToPx(context, 28)
+                dpToPx(context, 36),
+                dpToPx(context, 36)
             )
             closeBtnParams.addRule(RelativeLayout.ALIGN_PARENT_START)
             closeBtnParams.addRule(RelativeLayout.CENTER_VERTICAL)
@@ -430,7 +430,7 @@ class MediaPreview(
             titleParams.addRule(RelativeLayout.CENTER_IN_PARENT)
             layoutParams = titleParams
             setTextColor(Color.WHITE)
-            setTextSize(TypedValue.COMPLEX_UNIT_SP, 14f)
+            setTextSize(TypedValue.COMPLEX_UNIT_SP, 16f)
             text = if (mimeType.startsWith("image")) {
                 context.getString(R.string.preview_image)
             } else {
