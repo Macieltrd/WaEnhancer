@@ -329,11 +329,7 @@ class MediaPreview(
                                     RelativeLayout.LayoutParams.MATCH_PARENT,
                                     RelativeLayout.LayoutParams.MATCH_PARENT
                                 )
-                                // Vídeo ocupa a tela inteira (o título fica por cima);
-                                // fotos continuam abaixo do título
-                                if (!mimeType.startsWith("video")) {
-                                    contentParams.addRule(RelativeLayout.BELOW, header.id)
-                                }
+                                // Vídeo e foto ocupam a tela inteira (o título fica por cima)
                                 layoutParams = contentParams
                                 this.id = View.generateViewId()
                             }
@@ -668,6 +664,12 @@ class MediaPreview(
                     FrameLayout.LayoutParams.MATCH_PARENT
                 )
                 setImageBitmap(bitmap)
+                // Um toque na foto esconde o título; outro toque mostra de novo (igual ao vídeo)
+                onSingleTap = {
+                    currentHeader?.let { h ->
+                        h.visibility = if (h.visibility == View.VISIBLE) View.INVISIBLE else View.VISIBLE
+                    }
+                }
             }
 
             container.addView(imageView)
@@ -1209,6 +1211,13 @@ class MediaPreview(
         private var minScale = 0.5f
         private var maxScale = 10f
         private var baseScale = 1f
+        var onSingleTap: (() -> Unit)? = null
+        private val touchSlop = android.view.ViewConfiguration.get(context).scaledTouchSlop
+        private var downX = 0f
+        private var downY = 0f
+        private var moved = false
+        private var ignoreUp = false
+        private val pendingTap = Runnable { onSingleTap?.invoke() }
         private var isDoubleTapZoomed = false
         private val doubleTapSteps = floatArrayOf(3f, 6f, 10f)
         private var lastTapTime: Long = 0
@@ -1233,12 +1242,18 @@ class MediaPreview(
 
                 when (action) {
                     MotionEvent.ACTION_DOWN -> {
+                        removeCallbacks(pendingTap)
+                        downX = event.x
+                        downY = event.y
+                        moved = false
+                        ignoreUp = false
                         savedMatrix.set(matrixInstance)
                         lastTouch.set(event.x, event.y)
                         mode = DRAG
 
                         val currentTime = System.currentTimeMillis()
                         if (currentTime - lastTapTime < DOUBLE_TAP_TIMEOUT) {
+                            ignoreUp = true
                             handleDoubleTap(event.x, event.y)
                             lastTapTime = 0
                             return@setOnTouchListener true
@@ -1257,6 +1272,11 @@ class MediaPreview(
                     }
 
                     MotionEvent.ACTION_MOVE -> {
+                        if (pointerCount > 1 ||
+                            kotlin.math.hypot(event.x - downX, event.y - downY) > touchSlop
+                        ) {
+                            moved = true
+                        }
                         if (mode == DRAG && pointerCount == 1) {
                             val dx = event.x - lastTouch.x
                             val dy = event.y - lastTouch.y
@@ -1279,6 +1299,10 @@ class MediaPreview(
                     MotionEvent.ACTION_UP -> {
                         mode = NONE
                         parent?.requestDisallowInterceptTouchEvent(false)
+                        // toque simples: espera um pouco para ver se vem um segundo toque (zoom)
+                        if (!moved && !ignoreUp && onSingleTap != null) {
+                            postDelayed(pendingTap, DOUBLE_TAP_TIMEOUT)
+                        }
                     }
 
                     MotionEvent.ACTION_POINTER_UP -> {
