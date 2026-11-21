@@ -430,7 +430,7 @@ class MediaPreview(
             titleParams.addRule(RelativeLayout.CENTER_IN_PARENT)
             layoutParams = titleParams
             setTextColor(Color.WHITE)
-            setTextSize(TypedValue.COMPLEX_UNIT_SP, 16f)
+            setTextSize(TypedValue.COMPLEX_UNIT_SP, 18f)
             text = if (mimeType.startsWith("image")) {
                 context.getString(R.string.preview_image)
             } else {
@@ -1210,6 +1210,7 @@ class MediaPreview(
         private var maxScale = 10f
         private var baseScale = 1f
         private var isDoubleTapZoomed = false
+        private val doubleTapSteps = floatArrayOf(3f, 6f, 10f)
         private var lastTapTime: Long = 0
 
         companion object {
@@ -1316,14 +1317,18 @@ class MediaPreview(
             matrixInstance.getValues(matrixValues)
             val currentScale = matrixValues[Matrix.MSCALE_X]
 
-            if (!isDoubleTapZoomed || currentScale <= baseScale * 1.1f) {
-                val targetScale = baseScale * 3f
-                val scaleFactor = targetScale / currentScale
-                matrixInstance.postScale(scaleFactor, scaleFactor, x, y)
-                isDoubleTapZoomed = true
-            } else {
+            // cada toque duplo sobe um degrau: 3x, 6x, 10x; depois volta ao normal
+            val next = doubleTapSteps
+                .map { baseScale * it }
+                .firstOrNull { it > currentScale * 1.05f }
+
+            if (next == null) {
                 centerImage()
                 isDoubleTapZoomed = false
+            } else {
+                val scaleFactor = next / currentScale
+                matrixInstance.postScale(scaleFactor, scaleFactor, x, y)
+                isDoubleTapZoomed = true
             }
             limitScale()
             limitPan()
@@ -1408,6 +1413,7 @@ class MediaPreview(
             val scale = (viewWidth / drawableWidth).coerceAtMost(viewHeight / drawableHeight)
             baseScale = scale
             minScale = scale * 0.5f
+            maxScale = scale * 30f // pinça até 30x (como no vídeo)
 
             val dx = (viewWidth - drawableWidth * scale) / 2
             val dy = (viewHeight - drawableHeight * scale) / 2
