@@ -94,6 +94,7 @@ class MediaPreview(
 
     private var currentVideoView: VideoView? = null
     private var currentMediaPlayer: MediaPlayer? = null
+    private var currentHeader: View? = null
     private var currentSpeed = 1.0f
 
     @Volatile
@@ -322,6 +323,7 @@ class MediaPreview(
 
                             val header = createHeader(context, mimeType, previewDialog)
                             mainContainer.addView(header)
+                            currentHeader = header
 
                             val contentContainer = FrameLayout(context).apply {
                                 val contentParams = RelativeLayout.LayoutParams(
@@ -712,6 +714,17 @@ class MediaPreview(
             videoContainer.addView(controls)
             container.addView(videoContainer)
 
+            // Um toque na tela esconde a barra de controles e o cabeçalho (fica só o vídeo);
+            // outro toque mostra de novo
+            controls.isClickable = true
+            val toggleControls = {
+                val show = !controls.isVisible
+                controls.visibility = if (show) View.VISIBLE else View.GONE
+                currentHeader?.visibility = if (show) View.VISIBLE else View.INVISIBLE
+            }
+            videoView.setOnClickListener { toggleControls() }
+            videoContainer.setOnClickListener { toggleControls() }
+
             // Fix: força saída de áudio de mídia e pede foco de áudio, para o vídeo tocar com som
             videoView.setAudioAttributes(
                 AudioAttributes.Builder()
@@ -762,12 +775,57 @@ class MediaPreview(
             controlsParams.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM)
             layoutParams = controlsParams
             setBackgroundColor("#99000000".toColorInt())
-            setPadding(
-                dpToPx(context, 16),
-                dpToPx(context, 8),
-                dpToPx(context, 16),
-                dpToPx(context, 72) // sobe os botões para não ficarem atrás da barra do Android
-            )
+            // Espaço da barra de controles se ajusta à posição do aparelho:
+            // em pé, sobe os botões para não ficarem atrás da barra do Android (mín. 72dp);
+            // deitado, a barra do Android fica do lado, então os botões descem (16dp)
+            val basePad = dpToPx(context, 16)
+            val minPortraitBottom = dpToPx(context, 72)
+            var insetLeft = 0
+            var insetRight = 0
+            var insetBottom = 0
+            val applyControlsPadding = { v: View ->
+                val landscape = v.resources.configuration.orientation ==
+                    android.content.res.Configuration.ORIENTATION_LANDSCAPE
+                val bottom = if (landscape) dpToPx(context, 6) + insetBottom
+                else maxOf(minPortraitBottom, basePad + insetBottom)
+                val left = basePad + insetLeft
+                val right = basePad + insetRight
+                val top = if (landscape) dpToPx(context, 2) else dpToPx(context, 8)
+                // deitado: botões mais juntos da linha do tempo
+                val group = v as? ViewGroup
+                val buttonsRow = group?.getChildAt(1)
+                val rowParams = buttonsRow?.layoutParams as? LinearLayout.LayoutParams
+                val rowTop = if (landscape) 0 else dpToPx(context, 8)
+                if (rowParams != null && rowParams.topMargin != rowTop) {
+                    rowParams.topMargin = rowTop
+                    buttonsRow?.layoutParams = rowParams
+                }
+                if (v.paddingLeft != left || v.paddingTop != top ||
+                    v.paddingRight != right || v.paddingBottom != bottom
+                ) {
+                    v.setPadding(left, top, right, bottom)
+                }
+            }
+            setOnApplyWindowInsetsListener { v, insets ->
+                if (android.os.Build.VERSION.SDK_INT >= 30) {
+                    val bars = insets.getInsets(android.view.WindowInsets.Type.systemBars())
+                    insetLeft = bars.left
+                    insetRight = bars.right
+                    insetBottom = bars.bottom
+                } else {
+                    @Suppress("DEPRECATION")
+                    run {
+                        insetLeft = insets.systemWindowInsetLeft
+                        insetRight = insets.systemWindowInsetRight
+                        insetBottom = insets.systemWindowInsetBottom
+                    }
+                }
+                applyControlsPadding(v)
+                insets
+            }
+            // também reajusta quando o aparelho é girado
+            addOnLayoutChangeListener { v, _, _, _, _, _, _, _, _ -> applyControlsPadding(v) }
+            applyControlsPadding(this)
         }
 
         val seekBar = SeekBar(context).apply {
