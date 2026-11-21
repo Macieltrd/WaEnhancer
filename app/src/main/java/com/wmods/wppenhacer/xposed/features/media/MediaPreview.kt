@@ -722,8 +722,87 @@ class MediaPreview(
                 controls.visibility = if (show) View.VISIBLE else View.GONE
                 currentHeader?.visibility = if (show) View.VISIBLE else View.INVISIBLE
             }
-            videoView.setOnClickListener { toggleControls() }
-            videoContainer.setOnClickListener { toggleControls() }
+
+            // Zoom no vídeo: pinça com dois dedos, toque duplo (2x / volta ao normal),
+            // e arrastar com um dedo quando está ampliado. Um toque simples esconde/mostra a barra.
+            var zoom = 1f
+            var panX = 0f
+            var panY = 0f
+            val applyZoom = {
+                val maxX = (zoom - 1f) * videoView.width / 2f
+                val maxY = (zoom - 1f) * videoView.height / 2f
+                panX = panX.coerceIn(-maxX, maxX)
+                panY = panY.coerceIn(-maxY, maxY)
+                videoView.scaleX = zoom
+                videoView.scaleY = zoom
+                videoView.translationX = panX
+                videoView.translationY = panY
+            }
+            val scaleDetector = android.view.ScaleGestureDetector(
+                context,
+                object : android.view.ScaleGestureDetector.SimpleOnScaleGestureListener() {
+                    override fun onScale(detector: android.view.ScaleGestureDetector): Boolean {
+                        val newZoom = (zoom * detector.scaleFactor).coerceIn(1f, 20f)
+                        val ratio = newZoom / zoom
+                        // mantém o ponto entre os dedos no mesmo lugar
+                        val fx = detector.focusX - videoView.width / 2f
+                        val fy = detector.focusY - videoView.height / 2f
+                        panX = fx - (fx - panX) * ratio
+                        panY = fy - (fy - panY) * ratio
+                        zoom = newZoom
+                        applyZoom()
+                        return true
+                    }
+                }
+            )
+            val gestureDetector = android.view.GestureDetector(
+                context,
+                object : android.view.GestureDetector.SimpleOnGestureListener() {
+                    override fun onDown(e: MotionEvent): Boolean = true
+
+                    override fun onSingleTapConfirmed(e: MotionEvent): Boolean {
+                        toggleControls()
+                        return true
+                    }
+
+                    override fun onDoubleTap(e: MotionEvent): Boolean {
+                        if (zoom > 1f) {
+                            zoom = 1f
+                            panX = 0f
+                            panY = 0f
+                        } else {
+                            val fx = e.x - videoView.width / 2f
+                            val fy = e.y - videoView.height / 2f
+                            panX = fx - (fx - panX) * 2f
+                            panY = fy - (fy - panY) * 2f
+                            zoom = 2f
+                        }
+                        applyZoom()
+                        return true
+                    }
+
+                    override fun onScroll(
+                        e1: MotionEvent?,
+                        e2: MotionEvent,
+                        distanceX: Float,
+                        distanceY: Float
+                    ): Boolean {
+                        if (zoom > 1f && !scaleDetector.isInProgress) {
+                            panX -= distanceX
+                            panY -= distanceY
+                            applyZoom()
+                        }
+                        return true
+                    }
+                }
+            )
+            videoContainer.setOnTouchListener { _, event ->
+                scaleDetector.onTouchEvent(event)
+                gestureDetector.onTouchEvent(event)
+                true
+            }
+            // ao girar o aparelho, reajusta os limites do zoom
+            videoView.addOnLayoutChangeListener { _, _, _, _, _, _, _, _, _ -> applyZoom() }
 
             // Fix: força saída de áudio de mídia e pede foco de áudio, para o vídeo tocar com som
             videoView.setAudioAttributes(
