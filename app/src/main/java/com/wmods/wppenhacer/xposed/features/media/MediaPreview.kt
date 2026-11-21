@@ -322,7 +322,6 @@ class MediaPreview(
                             dialog = previewDialog
 
                             val header = createHeader(context, mimeType, previewDialog)
-                            mainContainer.addView(header)
                             currentHeader = header
 
                             val contentContainer = FrameLayout(context).apply {
@@ -330,11 +329,16 @@ class MediaPreview(
                                     RelativeLayout.LayoutParams.MATCH_PARENT,
                                     RelativeLayout.LayoutParams.MATCH_PARENT
                                 )
-                                contentParams.addRule(RelativeLayout.BELOW, header.id)
+                                // Vídeo ocupa a tela inteira (o título fica por cima);
+                                // fotos continuam abaixo do título
+                                if (!mimeType.startsWith("video")) {
+                                    contentParams.addRule(RelativeLayout.BELOW, header.id)
+                                }
                                 layoutParams = contentParams
                                 this.id = View.generateViewId()
                             }
                             mainContainer.addView(contentContainer)
+                            mainContainer.addView(header)
 
                             val loadingContainer = createLoadingView(context)
                             contentContainer.addView(loadingContainer)
@@ -391,7 +395,7 @@ class MediaPreview(
             id = View.generateViewId()
             val headerParams = RelativeLayout.LayoutParams(
                 RelativeLayout.LayoutParams.MATCH_PARENT,
-                dpToPx(context, 56)
+                dpToPx(context, 28) // metade da altura original (56dp)
             )
             headerParams.addRule(RelativeLayout.ALIGN_PARENT_TOP)
             layoutParams = headerParams
@@ -402,8 +406,8 @@ class MediaPreview(
         val closeBtn = ImageButton(context).apply {
             id = View.generateViewId()
             val closeBtnParams = RelativeLayout.LayoutParams(
-                dpToPx(context, 40),
-                dpToPx(context, 40)
+                dpToPx(context, 28),
+                dpToPx(context, 28)
             )
             closeBtnParams.addRule(RelativeLayout.ALIGN_PARENT_START)
             closeBtnParams.addRule(RelativeLayout.CENTER_VERTICAL)
@@ -426,7 +430,7 @@ class MediaPreview(
             titleParams.addRule(RelativeLayout.CENTER_IN_PARENT)
             layoutParams = titleParams
             setTextColor(Color.WHITE)
-            setTextSize(TypedValue.COMPLEX_UNIT_SP, 18f)
+            setTextSize(TypedValue.COMPLEX_UNIT_SP, 14f)
             text = if (mimeType.startsWith("image")) {
                 context.getString(R.string.preview_image)
             } else {
@@ -723,8 +727,9 @@ class MediaPreview(
                 currentHeader?.visibility = if (show) View.VISIBLE else View.INVISIBLE
             }
 
-            // Zoom no vídeo: pinça com dois dedos, toque duplo (2x / volta ao normal),
+            // Zoom no vídeo: pinça com dois dedos, toque duplo (3x, 6x, 10x e volta ao normal),
             // e arrastar com um dedo quando está ampliado. Um toque simples esconde/mostra a barra.
+            val doubleTapSteps = floatArrayOf(3f, 6f, 10f)
             var zoom = 1f
             var panX = 0f
             var panY = 0f
@@ -742,7 +747,7 @@ class MediaPreview(
                 context,
                 object : android.view.ScaleGestureDetector.SimpleOnScaleGestureListener() {
                     override fun onScale(detector: android.view.ScaleGestureDetector): Boolean {
-                        val newZoom = (zoom * detector.scaleFactor).coerceIn(1f, 20f)
+                        val newZoom = (zoom * detector.scaleFactor).coerceIn(1f, 30f)
                         val ratio = newZoom / zoom
                         // mantém o ponto entre os dedos no mesmo lugar
                         val fx = detector.focusX - videoView.width / 2f
@@ -766,16 +771,19 @@ class MediaPreview(
                     }
 
                     override fun onDoubleTap(e: MotionEvent): Boolean {
-                        if (zoom > 1f) {
+                        // cada toque duplo sobe um degrau: 3x, 6x, 10x; depois volta ao normal
+                        val next = doubleTapSteps.firstOrNull { it > zoom + 0.05f }
+                        if (next == null) {
                             zoom = 1f
                             panX = 0f
                             panY = 0f
                         } else {
+                            val ratio = next / zoom
                             val fx = e.x - videoView.width / 2f
                             val fy = e.y - videoView.height / 2f
-                            panX = fx - (fx - panX) * 2f
-                            panY = fy - (fy - panY) * 2f
-                            zoom = 2f
+                            panX = fx - (fx - panX) * ratio
+                            panY = fy - (fy - panY) * ratio
+                            zoom = next
                         }
                         applyZoom()
                         return true
