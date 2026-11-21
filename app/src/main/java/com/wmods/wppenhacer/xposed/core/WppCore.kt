@@ -288,10 +288,10 @@ object WppCore {
                     ReflectionUtils.findIndexOfType(senderMethod.parameterTypes, List::class.java)
                 newObject[index2] = Collections.singletonList(userJid)
                 senderMethod.invoke(getActionUser(), *newObject)
-                Utils.showToast("Message sent to $number", Toast.LENGTH_SHORT)
+                Utils.showToast("Mensagem enviada para $number", Toast.LENGTH_SHORT)
             }
         } catch (e: Exception) {
-            Utils.showToast("Error in sending message:${e.message}", Toast.LENGTH_SHORT)
+            Utils.showToast("Erro ao enviar a mensagem: ${e.message}", Toast.LENGTH_SHORT)
             YukiLog.log(e)
         }
     }
@@ -310,7 +310,7 @@ object WppCore {
             }
             senderMethod.invoke(getActionUser(), objMessage, s, !TextUtils.isEmpty(s))
         } catch (e: Exception) {
-            Utils.showToast("Error in sending reaction:${e.message}", Toast.LENGTH_SHORT)
+            Utils.showToast("Erro ao enviar a reação: ${e.message}", Toast.LENGTH_SHORT)
             YukiLog.log(e)
         }
     }

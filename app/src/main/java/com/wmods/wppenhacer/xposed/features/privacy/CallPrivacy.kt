@@ -45,7 +45,7 @@ class CallPrivacy(loader: ClassLoader, preferences: SharedPreferences) :
                     args[0] is Message -> (args[0] as Message).obj
                     args.size > 1 && callInfoClass.isInstance(args[1]) -> args[1]
                     else -> {
-                        Utils.showToast("Invalid call info", Toast.LENGTH_SHORT)
+                        Utils.showToast("Informações da chamada inválidas", Toast.LENGTH_SHORT)
                         return@before
                     }
                 }

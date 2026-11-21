@@ -224,7 +224,7 @@ class RecordingsFragment : Fragment(), RecordingsAdapter.OnRecordingActionListen
                         if (deleted) {
                             loadRecordings()
                         } else {
-                            Toast.makeText(requireContext(), "Failed to delete", Toast.LENGTH_SHORT)
+                            Toast.makeText(requireContext(), "Falha ao apagar", Toast.LENGTH_SHORT)
                                 .show()
                         }
                     }
@@ -253,7 +253,7 @@ class RecordingsFragment : Fragment(), RecordingsAdapter.OnRecordingActionListen
             }
             startActivity(Intent.createChooser(intent, getString(R.string.share_recording)))
         } catch (e: Exception) {
-            Toast.makeText(requireContext(), "Error sharing: " + e.message, Toast.LENGTH_SHORT)
+            Toast.makeText(requireContext(), "Erro ao compartilhar: " + e.message, Toast.LENGTH_SHORT)
                 .show()
         }
     }

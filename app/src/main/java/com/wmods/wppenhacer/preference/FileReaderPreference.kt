@@ -149,7 +149,7 @@ class FileReaderPreference @JvmOverloads constructor(
             }
         } catch (e: Exception) {
             Handler(Looper.getMainLooper()).post {
-                Toast.makeText(context, "Error reading XML file: " + e.message, Toast.LENGTH_SHORT)
+                Toast.makeText(context, "Erro ao ler o arquivo XML: " + e.message, Toast.LENGTH_SHORT)
                     .show()
             }
         }
@@ -179,11 +179,11 @@ class FileReaderPreference @JvmOverloads constructor(
 
                 sharedPreferences?.edit()?.putString(key, content)?.apply()
                 summary = path
-                Toast.makeText(context, "XML file loaded successfully", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, "Arquivo XML carregado com sucesso", Toast.LENGTH_SHORT).show()
             }
         } catch (e: Exception) {
             Handler(Looper.getMainLooper()).post {
-                Toast.makeText(context, "Error parsing XML: " + e.message, Toast.LENGTH_SHORT)
+                Toast.makeText(context, "Erro ao processar o XML: " + e.message, Toast.LENGTH_SHORT)
                     .show()
             }
         }

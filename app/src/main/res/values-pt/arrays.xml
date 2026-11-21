@@ -3,7 +3,7 @@
     <string-array name="status_style_entries">
         <item>@string/disabled</item>
         <item>Estilo Facebook (1 linha)</item>
-        <item>Estilo Facebook (Tabela)</item>
+        <item>Estilo Facebook (Grade)</item>
         <item>Status vertical (sem prévia)</item>
         <item>Status vertical (círculo)</item>
         <item>Status vertical (quadrado)</item>

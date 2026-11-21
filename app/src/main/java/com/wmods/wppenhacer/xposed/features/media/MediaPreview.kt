@@ -654,7 +654,7 @@ class MediaPreview(
     ) {
         try {
             if (bitmap == null) {
-                Utils.showToast("Failed to load image", Toast.LENGTH_SHORT)
+                Utils.showToast("Falha ao carregar a imagem", Toast.LENGTH_SHORT)
                 return
             }
 
@@ -676,7 +676,7 @@ class MediaPreview(
 
         } catch (e: Exception) {
             logDebug(e)
-            Utils.showToast("Error displaying image: ${e.message}", Toast.LENGTH_SHORT)
+            Utils.showToast("Erro ao exibir a imagem: ${e.message}", Toast.LENGTH_SHORT)
         }
     }
 
@@ -842,13 +842,13 @@ class MediaPreview(
 
             videoView.setOnErrorListener { _, what, extra ->
                 logDebug("MediaPlayer error: what=$what, extra=$extra, path=${currentFile.absolutePath}, size=${currentFile.length()}")
-                Utils.showToast("Error playing video ($what, $extra)", Toast.LENGTH_SHORT)
+                Utils.showToast("Erro ao reproduzir o vídeo ($what, $extra)", Toast.LENGTH_SHORT)
                 true
             }
 
         } catch (e: Exception) {
             logDebug(e)
-            Utils.showToast("Error displaying video: ${e.message}", Toast.LENGTH_SHORT)
+            Utils.showToast("Erro ao exibir o vídeo: ${e.message}", Toast.LENGTH_SHORT)
         }
     }
 

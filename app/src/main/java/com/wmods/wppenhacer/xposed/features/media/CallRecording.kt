@@ -350,7 +350,7 @@ class CallRecording(
             logDebug("WaEnhancer: Recording started (${recorderSelection.sourceName}): ${outputTarget.file.absolutePath}")
 
             if (xprefs.getBoolean("call_recording_toast", false)) {
-                Utils.showToast("Recording started", Toast.LENGTH_SHORT)
+                Utils.showToast("Gravação iniciada", Toast.LENGTH_SHORT)
             }
         } catch (e: Exception) {
             logDebug("WaEnhancer: startRecording error: ${e.message}")

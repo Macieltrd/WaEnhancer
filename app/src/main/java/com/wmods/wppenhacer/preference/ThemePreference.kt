@@ -160,7 +160,7 @@ class ThemePreference(context: Context, attrs: AttributeSet?) : Preference(conte
 
     override fun onUriPicked(uri: Uri) {
         CompletableFuture.runAsync {
-            Utils.showToast("Importing theme...", Toast.LENGTH_SHORT)
+            Utils.showToast("Importando tema...", Toast.LENGTH_SHORT)
             try {
                 val inputStream = context.contentResolver.openInputStream(uri)!!
                 val zipInputStream = ZipInputStream(inputStream)

@@ -128,13 +128,13 @@ class FileSelectPreference : Preference, Preference.OnPreferenceClickListener,
             offset = File(DialogConfigs.DEFAULT_DIR)
         }
         val dialog = FilePickerDialog(context, properties)
-        dialog.setTitle("Select a local to download")
+        dialog.setTitle("Escolha o local de download")
         dialog.setDialogSelectionListener { selectionPaths ->
             getSharedPreferences()!!.edit { putString(key, selectionPaths[0]) }
             summary = selectionPaths[0]
         }
         dialog.show()
-        Utils.showToast("Select a local to download", Toast.LENGTH_SHORT)
+        Utils.showToast("Escolha o local de download", Toast.LENGTH_SHORT)
     }
 
     override fun onFilePicked(file: File) {
@@ -181,7 +181,7 @@ class FileSelectPreference : Preference, Preference.OnPreferenceClickListener,
                     Files.copy(input, outFile.toPath(), StandardCopyOption.REPLACE_EXISTING)
                 }
             } catch (exception: Exception) {
-                Utils.showToast("Failed to save file: $exception", Toast.LENGTH_SHORT)
+                Utils.showToast("Falha ao salvar o arquivo: $exception", Toast.LENGTH_SHORT)
             }
             editor.putString(key, outFile.absolutePath).apply()
         }

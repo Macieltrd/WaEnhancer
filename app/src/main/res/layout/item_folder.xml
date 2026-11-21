@@ -32,7 +32,7 @@
             style="@style/Widget.Material3.Button.IconButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:contentDescription="Edit"
+            android:contentDescription="Editar"
             app:icon="@drawable/edit"
             app:iconTint="?colorPrimary"
             app:layout_constraintBottom_toBottomOf="parent"
@@ -54,7 +54,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:paddingEnd="@dimen/spacing_xs"
-                android:text="author:"
+                android:text="autor:"
                 android:textAppearance="?textAppearanceBodySmall"
                 android:textColor="@color/text_secondary" />
 
@@ -62,7 +62,7 @@
                 android:id="@+id/author"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="unknown"
+                android:text="desconhecido"
                 android:textAppearance="?textAppearanceBodySmall"
                 android:textColor="@color/text_secondary" />
 

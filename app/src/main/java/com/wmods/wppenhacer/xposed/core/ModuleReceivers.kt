@@ -63,7 +63,7 @@ internal object ModuleReceivers {
             context, "${context.getString(R.string.rebooting)} $appName...", Toast.LENGTH_SHORT
         ).show()
         if (!Utils.doRestart(context)) {
-            Toast.makeText(context, "Unable to rebooting $appName", Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, "Não foi possível reiniciar $appName", Toast.LENGTH_SHORT).show()
         }
     }
 }

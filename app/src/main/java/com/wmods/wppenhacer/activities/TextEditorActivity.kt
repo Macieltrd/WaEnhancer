@@ -227,7 +227,7 @@ class TextEditorActivity : BaseActivity() {
                 }
             } catch (e: Exception) {
                 withContext(Dispatchers.Main) {
-                    Utils.showToast("Error: " + e.message, Toast.LENGTH_SHORT)
+                    Utils.showToast("Erro: " + e.message, Toast.LENGTH_SHORT)
                 }
             }
         }
@@ -301,7 +301,7 @@ class TextEditorActivity : BaseActivity() {
                 withContext(Dispatchers.Main) {
                     Toast.makeText(
                         this@TextEditorActivity,
-                        "Error: " + e.message,
+                        "Erro: " + e.message,
                         Toast.LENGTH_SHORT
                     ).show()
                 }
