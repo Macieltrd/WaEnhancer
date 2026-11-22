@@ -241,7 +241,7 @@
     <string name="custom_theme_css">Tema personalizado CSS</string>
     <string name="custom_theme_css_sum">Personaliza seu WhatsApp usando código CSS</string>
     <string name="antidisappearing">Manter mensagens temporárias</string>
-    <string name="antidisappearing_sum">Quando ativo, as mensagens temporárias não somem para você.</string>
+    <string name="antidisappearing_sum">Quando ativo, as mensagens temporárias não desaparecem para você.</string>
     <string name="title_audio">Áudio</string>
     <string name="android_version">Versão do sistema (API)</string>
     <string name="message_removed_on">Mensagem apagada em %s</string>
