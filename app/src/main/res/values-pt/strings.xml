@@ -498,6 +498,8 @@
     <string name="copy_message_action">Copiar</string>
     <string name="copy_selection_copy">Copiar</string>
     <string name="message_copied">Mensagem copiada</string>
+    <string name="copy_message_toast_title">Aviso de mensagem copiada</string>
+    <string name="copy_message_toast_sum">Mostra o aviso \"Mensagem copiada\" depois de tocar em Copiar</string>
     <string name="copy_selection_dialog_title">Copiar texto</string>
     <string name="picker_loading_contacts">Carregando contatos…</string>
     <string name="mode_all">Todos</string>

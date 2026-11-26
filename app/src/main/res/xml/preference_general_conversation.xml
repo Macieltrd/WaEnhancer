@@ -144,6 +144,12 @@
             app:summary="@string/copy_selection_message_sum"
             app:title="@string/copy_selection_message_title" />
 
+        <rikka.material.preference.MaterialSwitchPreference
+            app:defaultValue="true"
+            app:key="copy_message_toast"
+            app:summary="@string/copy_message_toast_sum"
+            app:title="@string/copy_message_toast_title" />
+
     </PreferenceCategory>
 
     <PreferenceCategory

@@ -72,7 +72,9 @@ class CopySelectionMessage(classLoader: ClassLoader, xprefs: SharedPreferences) 
         try {
             val clipboard = activity.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
             clipboard.setPrimaryClip(ClipData.newPlainText("message", text))
-            Utils.showToast(Utils.getString(R.string.message_copied), Toast.LENGTH_SHORT)
+            if (xprefs.getBoolean("copy_message_toast", true)) {
+                Utils.showToast(Utils.getString(R.string.message_copied), Toast.LENGTH_SHORT)
+            }
         } catch (e: Throwable) {
             Utils.showToast(e.message ?: "", Toast.LENGTH_SHORT)
         }

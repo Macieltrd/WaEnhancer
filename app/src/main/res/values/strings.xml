@@ -515,6 +515,8 @@
     <string name="copy_message_action">Copy</string>
     <string name="copy_selection_copy">Copy</string>
     <string name="message_copied">Message copied</string>
+    <string name="copy_message_toast_title">Copied message notice</string>
+    <string name="copy_message_toast_sum">Shows a \"Message copied\" notice after tapping Copy</string>
     <string name="copy_selection_dialog_title">Copy Text</string>
     <string name="picker_loading_contacts">Loading contacts…</string>
     <string name="mode_all">All</string>
